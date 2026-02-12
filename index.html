@@ -524,6 +524,281 @@
       color: #6a6a6a;
     }
 
+    /* ========== 框选矩形 ========== */
+    .select-rect {
+      position: absolute;
+      border: 2px dashed #0f380f;
+      background: rgba(15,56,15,0.12);
+      pointer-events: none;
+      z-index: 12;
+      box-shadow: 0 0 6px rgba(15,56,15,0.3);
+    }
+
+    /* ========== 猜谜标签（画布上的 ??? 标记） ========== */
+    .riddle-tag {
+      position: absolute;
+      z-index: 14;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: #0f380f;
+      background: transparent;
+      border: 2px dashed #0f380f;
+      box-shadow: none;
+      transition: all 0.15s;
+      text-align: center;
+      line-height: 1.4;
+      padding: 2px 4px;
+      min-width: 40px;
+      min-height: 24px;
+      overflow: visible;
+    }
+    .riddle-tag:hover {
+      border-color: #9bbc0f;
+      box-shadow: 0 0 10px rgba(139,172,15,0.4);
+      transform: scale(1.02);
+    }
+    .riddle-tag.solved {
+      background: transparent;
+      border: 2px solid rgba(255,255,255,0.85);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(255,255,255,0.5), inset 0 0 8px rgba(255,255,255,0.1);
+    }
+    .riddle-tag.solved:hover {
+      box-shadow: 0 0 18px rgba(255,255,255,0.7);
+    }
+    /* ??? 文字标签定位在选区底部外侧 */
+    .riddle-tag-label {
+      position: absolute;
+      bottom: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 8px;
+      white-space: nowrap;
+      padding: 1px 6px;
+      background: rgba(15,56,15,0.8);
+      border: 1px solid #306230;
+      border-radius: 2px;
+      color: #9bbc0f;
+      pointer-events: none;
+    }
+    .riddle-tag.solved .riddle-tag-label {
+      background: rgba(255,255,255,0.9);
+      border-color: rgba(255,255,255,0.6);
+      color: #0f380f;
+    }
+
+    /* ========== 猜谜弹窗（通用） ========== */
+    .riddle-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .riddle-overlay.open { display: flex; }
+
+    .riddle-panel {
+      background: #3a3a3a;
+      border: 4px solid #1a1a1a;
+      box-shadow: 8px 8px 0 #0a0a0a, 0 0 0 2px #4a4a4a;
+      padding: 36px;
+      min-width: 420px;
+      max-width: 92vw;
+      text-align: center;
+    }
+
+    .riddle-panel-title {
+      font-size: 15px;
+      color: #9bbc0f;
+      margin-bottom: 22px;
+      letter-spacing: 2px;
+    }
+
+    .riddle-panel-desc {
+      font-size: 11px;
+      color: #6a6a6a;
+      margin-bottom: 18px;
+      line-height: 1.8;
+    }
+
+    .riddle-input {
+      width: 100%;
+      padding: 16px 18px;
+      background: #1a1a1a;
+      border: 3px solid #0f380f;
+      border-radius: 4px;
+      color: #8bac0f;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 14px;
+      text-align: center;
+      outline: none;
+      margin-bottom: 20px;
+    }
+    .riddle-input:focus {
+      border-color: #9bbc0f;
+      box-shadow: 0 0 10px rgba(139,172,15,0.4);
+    }
+
+    .riddle-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .riddle-btn {
+      padding: 14px 24px;
+      background: #306230;
+      border: 2px solid #0f380f;
+      border-radius: 4px;
+      color: #9bbc0f;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      cursor: pointer;
+      box-shadow: inset 0 -2px 0 #1a3a1a, inset 0 1px 0 #4a8a4a;
+      transition: all 0.1s;
+    }
+    .riddle-btn:hover {
+      background: #3a7a3a;
+      color: #fff;
+    }
+    .riddle-btn:active {
+      transform: translateY(1px);
+      box-shadow: inset 0 2px 0 #1a3a1a;
+    }
+    .riddle-btn.cancel {
+      background: #4a4a4a;
+      border-color: #1a1a1a;
+      color: #8bac0f;
+      box-shadow: inset 0 -2px 0 #333, inset 0 1px 0 #555;
+    }
+
+    /* ========== 像素风确认弹窗（替代 confirm） ========== */
+    .pixel-confirm-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.75);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.15s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .pixel-confirm-panel {
+      background: #3a3a3a;
+      border: 4px solid #1a1a1a;
+      box-shadow: 8px 8px 0 #0a0a0a, 0 0 0 2px #4a4a4a;
+      padding: 30px 36px;
+      min-width: 340px;
+      max-width: 88vw;
+      text-align: center;
+    }
+    .pixel-confirm-msg {
+      font-size: 12px;
+      color: #9bbc0f;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
+      line-height: 1.6;
+    }
+    .pixel-confirm-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .pixel-confirm-btn {
+      padding: 12px 22px;
+      border: 2px solid #0f380f;
+      border-radius: 4px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .pixel-confirm-btn.yes {
+      background: #8b2020;
+      color: #ffaaaa;
+      border-color: #5a1010;
+      box-shadow: inset 0 -2px 0 #601515, inset 0 1px 0 #b03030;
+    }
+    .pixel-confirm-btn.yes:hover {
+      background: #a03030;
+      color: #fff;
+    }
+    .pixel-confirm-btn.no {
+      background: #4a4a4a;
+      color: #8bac0f;
+      border-color: #1a1a1a;
+      box-shadow: inset 0 -2px 0 #333, inset 0 1px 0 #555;
+    }
+    .pixel-confirm-btn.no:hover {
+      background: #555;
+      color: #9bbc0f;
+    }
+
+    /* 猜中弹窗 */
+    .riddle-success-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 400;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .riddle-success-overlay.open { display: flex; }
+
+    .riddle-success-panel {
+      background: #0f380f;
+      border: 4px solid #306230;
+      box-shadow: 0 0 40px rgba(139,172,15,0.4), 8px 8px 0 #0a0a0a;
+      padding: 30px 40px;
+      text-align: center;
+      animation: successPop 0.4s ease;
+    }
+    @keyframes successPop {
+      0% { transform: scale(0.5); opacity: 0; }
+      70% { transform: scale(1.08); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .riddle-success-title {
+      font-size: 12px;
+      color: #9bbc0f;
+      margin-bottom: 8px;
+      letter-spacing: 2px;
+    }
+    .riddle-success-word {
+      font-size: 14px;
+      color: #8bac0f;
+      margin-bottom: 18px;
+    }
+    .riddle-success-btn {
+      padding: 10px 24px;
+      background: #306230;
+      border: 2px solid #8bac0f;
+      border-radius: 4px;
+      color: #9bbc0f;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(139,172,15,0.3);
+    }
+    .riddle-success-btn:hover {
+      background: #3a7a3a;
+      color: #fff;
+    }
+
     /* 响应式 */
     @media (max-width: 680px) {
       .toolbar { padding: 6px 8px; gap: 4px; }
@@ -534,6 +809,7 @@
       .board-id-tag { max-width: 80px; font-size: 5px; }
       .export-panel { min-width: unset; padding: 14px; }
       .export-sizes { grid-template-columns: repeat(2, 1fr); }
+      .riddle-panel { min-width: unset; padding: 16px; }
     }
   </style>
 </head>
@@ -546,6 +822,7 @@
       <span class="toolbar-label">TOOL</span>
       <button class="tool-btn active" id="btnPen" title="画笔">✎</button>
       <button class="tool-btn" id="btnEraser" title="橡皮擦">◻</button>
+      <button class="tool-btn tool-btn-wide" id="btnSelect" title="框选（你画我猜）" style="background:#8bac0f;color:#1a1a1a;border-color:#306230;font-size:9px;padding:0 12px;">⬚ GUESS</button>
     </div>
 
     <div class="toolbar-group">
@@ -645,6 +922,45 @@
 </div>
 
 <!-- Firebase SDK (compat 版本，支持直接在 script 标签中使用) -->
+
+<!-- 框选辅助矩形（画布内） -->
+<div class="select-rect" id="selectRect" style="display:none;"></div>
+
+<!-- 设置谜题弹窗（出题者输入答案） -->
+<div class="riddle-overlay" id="riddleSetOverlay">
+  <div class="riddle-panel">
+    <div class="riddle-panel-title">▦ 你画我猜 - 设置谜题 ▦</div>
+    <p class="riddle-panel-desc">请输入你画的物品名称<br>其他人将看到 ??? 并尝试猜测</p>
+    <input type="text" class="riddle-input" id="riddleSetInput" placeholder="输入物品名称..." maxlength="30" autocomplete="off">
+    <div class="riddle-btns">
+      <button class="riddle-btn" id="riddleSetConfirm">✓ 确认出题</button>
+      <button class="riddle-btn cancel" id="riddleSetCancel">✕ 取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 猜谜弹窗（猜测者输入） -->
+<div class="riddle-overlay" id="riddleGuessOverlay">
+  <div class="riddle-panel">
+    <div class="riddle-panel-title">▦ 你画我猜 - 猜猜看！ ▦</div>
+    <p class="riddle-panel-desc">这幅画画的是什么？</p>
+    <input type="text" class="riddle-input" id="riddleGuessInput" placeholder="输入你的答案..." maxlength="30" autocomplete="off">
+    <p id="riddleGuessHint" style="font-size:11px;color:#ff6060;margin-bottom:14px;display:none;">答案不对，再想想！</p>
+    <div class="riddle-btns">
+      <button class="riddle-btn" id="riddleGuessConfirm">✓ 提交答案</button>
+      <button class="riddle-btn cancel" id="riddleGuessCancel">✕ 关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 猜中弹窗 -->
+<div class="riddle-success-overlay" id="riddleSuccessOverlay">
+  <div class="riddle-success-panel">
+    <div class="riddle-success-title">★ 恭喜你猜中了 ★</div>
+    <div class="riddle-success-word" id="riddleSuccessWord"></div>
+    <button class="riddle-success-btn" id="riddleSuccessClose">OK!</button>
+  </div>
+</div>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -687,6 +1003,7 @@
   const presenceRef = boardRef.child('presence');
   const clearRef = boardRef.child('clearSignal');
   const snapshotRef = boardRef.child('snapshot');
+  const riddlesRef = boardRef.child('riddles');
 
   // 显示 Board ID
   const boardIdTag = document.getElementById('boardIdTag');
@@ -840,6 +1157,7 @@
 
   function startDraw(e) {
     e.preventDefault();
+    if (tool === 'select') return; // 框选模式下不绘制
     isDrawing = true;
     const targetCanvas = isPixelMode ? pixelCanvas : drawCanvas;
     const pos = getPointerPos(e, targetCanvas);
@@ -1052,29 +1370,32 @@
   const btnRedo = document.getElementById('btnRedo');
   const btnClear = document.getElementById('btnClear');
   const btnSave = document.getElementById('btnSave');
+  const btnSelect = document.getElementById('btnSelect');
   const sizeSlider = document.getElementById('sizeSlider');
   const sizeValue = document.getElementById('sizeValue');
 
-  btnPen.addEventListener('click', () => {
-    tool = 'pen';
-    btnPen.classList.add('active');
-    btnEraser.classList.remove('active');
-    drawCanvas.classList.remove('eraser-cursor');
-    pixelCanvas.classList.remove('eraser-cursor');
-    eraserRing.style.display = 'none';
-    drawCanvas.style.cursor = 'crosshair';
-    pixelCanvas.style.cursor = 'crosshair';
-  });
+  function switchTool(newTool) {
+    tool = newTool;
+    btnPen.classList.toggle('active', newTool === 'pen');
+    btnEraser.classList.toggle('active', newTool === 'eraser');
+    btnSelect.classList.toggle('active', newTool === 'select');
+    if (newTool === 'eraser') {
+      drawCanvas.classList.add('eraser-cursor');
+      pixelCanvas.classList.add('eraser-cursor');
+      drawCanvas.style.cursor = 'none';
+      pixelCanvas.style.cursor = 'none';
+    } else {
+      drawCanvas.classList.remove('eraser-cursor');
+      pixelCanvas.classList.remove('eraser-cursor');
+      eraserRing.style.display = 'none';
+      drawCanvas.style.cursor = newTool === 'select' ? 'crosshair' : 'crosshair';
+      pixelCanvas.style.cursor = newTool === 'select' ? 'crosshair' : 'crosshair';
+    }
+  }
 
-  btnEraser.addEventListener('click', () => {
-    tool = 'eraser';
-    btnEraser.classList.add('active');
-    btnPen.classList.remove('active');
-    drawCanvas.classList.add('eraser-cursor');
-    pixelCanvas.classList.add('eraser-cursor');
-    drawCanvas.style.cursor = 'none';
-    pixelCanvas.style.cursor = 'none';
-  });
+  btnPen.addEventListener('click', () => switchTool('pen'));
+  btnEraser.addEventListener('click', () => switchTool('eraser'));
+  btnSelect.addEventListener('click', () => switchTool('select'));
 
   document.querySelectorAll('.color-swatch').forEach(swatch => {
     swatch.addEventListener('click', () => {
@@ -1572,6 +1893,353 @@
 
   // 启动加载
   loadSnapshotFromFirebase();
+
+  // =============================================
+  //  你画我猜 - 框选 & 谜题系统
+  // =============================================
+  const selectRect = document.getElementById('selectRect');
+  const riddleSetOverlay = document.getElementById('riddleSetOverlay');
+  const riddleSetInput = document.getElementById('riddleSetInput');
+  const riddleSetConfirm = document.getElementById('riddleSetConfirm');
+  const riddleSetCancel = document.getElementById('riddleSetCancel');
+  const riddleGuessOverlay = document.getElementById('riddleGuessOverlay');
+  const riddleGuessInput = document.getElementById('riddleGuessInput');
+  const riddleGuessHint = document.getElementById('riddleGuessHint');
+  const riddleGuessConfirm = document.getElementById('riddleGuessConfirm');
+  const riddleGuessCancel = document.getElementById('riddleGuessCancel');
+  const riddleSuccessOverlay = document.getElementById('riddleSuccessOverlay');
+  const riddleSuccessWord = document.getElementById('riddleSuccessWord');
+  const riddleSuccessClose = document.getElementById('riddleSuccessClose');
+
+  // 框选状态
+  let isSelecting = false;
+  let selectStartX = 0, selectStartY = 0;
+  let selectEndX = 0, selectEndY = 0;
+
+  // 本地 riddle 标签元素 map（key = firebase key）
+  const riddleTags = {};
+
+  // 当前正在猜的 riddle key
+  let currentGuessKey = null;
+
+  // 获取 canvasArea 相对于 viewport 的位置
+  function getCanvasAreaRect() {
+    return canvasArea.getBoundingClientRect();
+  }
+
+  // ---- 框选事件（仅在 tool === 'select' 时激活）----
+  function selectStart(e) {
+    if (tool !== 'select') return;
+    e.preventDefault();
+    const targetCanvas = isPixelMode ? pixelCanvas : drawCanvas;
+    const pos = getPointerPos(e, targetCanvas);
+    isSelecting = true;
+    selectStartX = pos.x;
+    selectStartY = pos.y;
+    selectEndX = pos.x;
+    selectEndY = pos.y;
+    updateSelectRectUI();
+    selectRect.style.display = 'block';
+  }
+
+  function selectMove(e) {
+    if (!isSelecting || tool !== 'select') return;
+    e.preventDefault();
+    const targetCanvas = isPixelMode ? pixelCanvas : drawCanvas;
+    const pos = getPointerPos(e, targetCanvas);
+    selectEndX = pos.x;
+    selectEndY = pos.y;
+    updateSelectRectUI();
+  }
+
+  function selectEnd(e) {
+    if (!isSelecting || tool !== 'select') return;
+    if (e) e.preventDefault();
+    isSelecting = false;
+
+    const x = Math.min(selectStartX, selectEndX);
+    const y = Math.min(selectStartY, selectEndY);
+    const w = Math.abs(selectEndX - selectStartX);
+    const h = Math.abs(selectEndY - selectStartY);
+
+    // 选区太小则忽略
+    if (w < 10 || h < 10) {
+      selectRect.style.display = 'none';
+      return;
+    }
+
+    // 弹出设置谜题弹窗
+    openRiddleSetPanel(x, y, w, h);
+  }
+
+  function updateSelectRectUI() {
+    const areaRect = getCanvasAreaRect();
+    const x = Math.min(selectStartX, selectEndX);
+    const y = Math.min(selectStartY, selectEndY);
+    const w = Math.abs(selectEndX - selectStartX);
+    const h = Math.abs(selectEndY - selectStartY);
+    selectRect.style.left = (areaRect.left + x) + 'px';
+    selectRect.style.top = (areaRect.top + y) + 'px';
+    selectRect.style.width = w + 'px';
+    selectRect.style.height = h + 'px';
+  }
+
+  // 为两个画布都绑定框选事件
+  [drawCanvas, pixelCanvas].forEach(cvs => {
+    cvs.addEventListener('mousedown', selectStart);
+    cvs.addEventListener('mousemove', selectMove);
+    cvs.addEventListener('mouseup', selectEnd);
+    cvs.addEventListener('touchstart', selectStart, { passive: false });
+    cvs.addEventListener('touchmove', selectMove, { passive: false });
+    cvs.addEventListener('touchend', selectEnd, { passive: false });
+  });
+
+  // ---- 设置谜题弹窗 ----
+  let pendingRiddleRect = null;
+
+  function openRiddleSetPanel(x, y, w, h) {
+    pendingRiddleRect = {
+      x: x / drawCanvas.width,
+      y: y / drawCanvas.height,
+      w: w / drawCanvas.width,
+      h: h / drawCanvas.height,
+    };
+    riddleSetInput.value = '';
+    riddleSetOverlay.classList.add('open');
+    setTimeout(() => riddleSetInput.focus(), 100);
+  }
+
+  function closeRiddleSetPanel() {
+    riddleSetOverlay.classList.remove('open');
+    selectRect.style.display = 'none';
+    pendingRiddleRect = null;
+  }
+
+  riddleSetCancel.addEventListener('click', closeRiddleSetPanel);
+  riddleSetOverlay.addEventListener('click', (e) => {
+    if (e.target === riddleSetOverlay) closeRiddleSetPanel();
+  });
+
+  riddleSetConfirm.addEventListener('click', submitRiddle);
+  riddleSetInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitRiddle();
+  });
+
+  function submitRiddle() {
+    const answer = riddleSetInput.value.trim();
+    if (!answer) {
+      riddleSetInput.style.borderColor = '#ff6060';
+      setTimeout(() => riddleSetInput.style.borderColor = '', 800);
+      return;
+    }
+    if (!pendingRiddleRect) return;
+
+    // 存入 Firebase
+    const newRef = riddlesRef.push();
+    newRef.set({
+      rx: pendingRiddleRect.x,
+      ry: pendingRiddleRect.y,
+      rw: pendingRiddleRect.w,
+      rh: pendingRiddleRect.h,
+      answer: answer,
+      createdBy: myPlayerId,
+      solvedBy: null,
+      createdAt: firebase.database.ServerValue.TIMESTAMP,
+    });
+
+    closeRiddleSetPanel();
+    switchTool('pen');
+    showToast('RIDDLE SET!');
+  }
+
+  // ---- 在画布上创建/更新 riddle 标签 ----
+  function createRiddleTag(key, data) {
+    if (riddleTags[key]) {
+      updateRiddleTagPosition(key, data);
+      return;
+    }
+
+    const tag = document.createElement('div');
+    tag.className = 'riddle-tag';
+    tag.dataset.riddleKey = key;
+
+    const label = document.createElement('span');
+    label.className = 'riddle-tag-label';
+
+    if (data.solvedBy) {
+      label.textContent = '★ ' + data.answer + ' ★';
+      tag.classList.add('solved');
+      tag.title = data.solvedBy + ' 猜中了！';
+    } else if (data.createdBy === myPlayerId) {
+      label.textContent = '???（' + data.answer + '）';
+      tag.title = '你出的题';
+    } else {
+      label.textContent = '???';
+      tag.title = '点击猜猜看！';
+    }
+
+    tag.appendChild(label);
+
+    tag.addEventListener('click', () => {
+      if (data.solvedBy) return;
+      if (data.createdBy === myPlayerId) return;
+      openGuessPanel(key);
+    });
+
+    tag.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      showPixelConfirm('删除这个猜谜框？', () => {
+        riddlesRef.child(key).remove();
+        showToast('RIDDLE DELETED');
+      });
+    });
+
+    canvasWrapper.appendChild(tag);
+    riddleTags[key] = { el: tag, data };
+    updateRiddleTagPosition(key, data);
+  }
+
+  function updateRiddleTagPosition(key, data) {
+    const entry = riddleTags[key];
+    if (!entry) return;
+    const el = entry.el;
+    const cw = drawCanvas.width;
+    const ch = drawCanvas.height;
+    el.style.left = (data.rx * cw) + 'px';
+    el.style.top = (data.ry * ch) + 'px';
+    el.style.width = (data.rw * cw) + 'px';
+    el.style.height = (data.rh * ch) + 'px';
+    entry.data = data;
+  }
+
+  function removeRiddleTag(key) {
+    if (riddleTags[key]) {
+      riddleTags[key].el.remove();
+      delete riddleTags[key];
+    }
+  }
+
+  // ---- 猜谜弹窗 ----
+  function openGuessPanel(riddleKey) {
+    currentGuessKey = riddleKey;
+    riddleGuessInput.value = '';
+    riddleGuessHint.style.display = 'none';
+    riddleGuessOverlay.classList.add('open');
+    setTimeout(() => riddleGuessInput.focus(), 100);
+  }
+
+  function closeGuessPanel() {
+    riddleGuessOverlay.classList.remove('open');
+    currentGuessKey = null;
+  }
+
+  riddleGuessCancel.addEventListener('click', closeGuessPanel);
+  riddleGuessOverlay.addEventListener('click', (e) => {
+    if (e.target === riddleGuessOverlay) closeGuessPanel();
+  });
+
+  riddleGuessConfirm.addEventListener('click', checkGuess);
+  riddleGuessInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') checkGuess();
+  });
+
+  function checkGuess() {
+    if (!currentGuessKey) return;
+    const entry = riddleTags[currentGuessKey];
+    if (!entry) return;
+
+    const guess = riddleGuessInput.value.trim().toLowerCase();
+    const answer = entry.data.answer.trim().toLowerCase();
+
+    if (guess === answer) {
+      // 猜中了！更新 Firebase
+      riddlesRef.child(currentGuessKey).update({
+        solvedBy: myPlayerId,
+      });
+      closeGuessPanel();
+      showSuccessPanel(entry.data.answer);
+    } else {
+      // 猜错了
+      riddleGuessHint.style.display = 'block';
+      riddleGuessInput.value = '';
+      riddleGuessInput.focus();
+      setTimeout(() => { riddleGuessHint.style.display = 'none'; }, 2000);
+    }
+  }
+
+  // ---- 猜中弹窗 ----
+  function showSuccessPanel(word) {
+    riddleSuccessWord.textContent = '「' + word + '」';
+    riddleSuccessOverlay.classList.add('open');
+  }
+
+  riddleSuccessClose.addEventListener('click', () => {
+    riddleSuccessOverlay.classList.remove('open');
+  });
+  riddleSuccessOverlay.addEventListener('click', (e) => {
+    if (e.target === riddleSuccessOverlay) riddleSuccessOverlay.classList.remove('open');
+  });
+
+  // ---- Firebase 监听 riddles ----
+  riddlesRef.on('child_added', (snap) => {
+    const data = snap.val();
+    if (!data) return;
+    createRiddleTag(snap.key, data);
+  });
+
+  riddlesRef.on('child_changed', (snap) => {
+    const data = snap.val();
+    if (!data) return;
+    // 更新标签（可能被猜中了）
+    removeRiddleTag(snap.key);
+    createRiddleTag(snap.key, data);
+  });
+
+  riddlesRef.on('child_removed', (snap) => {
+    removeRiddleTag(snap.key);
+  });
+
+  // 窗口 resize 时更新 riddle 标签位置
+  window.addEventListener('resize', () => {
+    Object.keys(riddleTags).forEach(key => {
+      const entry = riddleTags[key];
+      if (entry) updateRiddleTagPosition(key, entry.data);
+    });
+  });
+
+  // =============================================
+  //  像素风确认弹窗（替代浏览器 confirm）
+  // =============================================
+  function showPixelConfirm(message, onConfirm) {
+    const overlay = document.createElement('div');
+    overlay.className = 'pixel-confirm-overlay';
+    overlay.innerHTML = `
+      <div class="pixel-confirm-panel">
+        <div class="pixel-confirm-msg">${message}</div>
+        <div class="pixel-confirm-btns">
+          <button class="pixel-confirm-btn yes">✓ 确认</button>
+          <button class="pixel-confirm-btn no">✕ 取消</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const yesBtn = overlay.querySelector('.pixel-confirm-btn.yes');
+    const noBtn = overlay.querySelector('.pixel-confirm-btn.no');
+
+    function close() {
+      overlay.remove();
+    }
+
+    yesBtn.addEventListener('click', () => {
+      close();
+      if (onConfirm) onConfirm();
+    });
+    noBtn.addEventListener('click', close);
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) close();
+    });
+  }
 
 </script>
 
