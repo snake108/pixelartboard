@@ -360,6 +360,170 @@
       color: #9bbc0f;
     }
 
+    /* ========== 导出弹窗 ========== */
+    .export-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .export-overlay.open { display: flex; }
+
+    .export-panel {
+      background: #3a3a3a;
+      border: 4px solid #1a1a1a;
+      box-shadow: 8px 8px 0 #0a0a0a, 0 0 0 2px #4a4a4a;
+      padding: 20px;
+      min-width: 320px;
+      max-width: 90vw;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .export-title {
+      font-size: 10px;
+      color: #9bbc0f;
+      text-align: center;
+      margin-bottom: 16px;
+      letter-spacing: 2px;
+    }
+
+    .export-sizes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .export-size-btn {
+      padding: 10px 6px;
+      background: #4a4a4a;
+      border: 2px solid #1a1a1a;
+      border-radius: 4px;
+      color: #8bac0f;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.1s;
+      box-shadow: inset 0 -2px 0 #333, inset 0 1px 0 #555;
+    }
+    .export-size-btn:hover {
+      background: #555;
+      color: #9bbc0f;
+    }
+    .export-size-btn:active {
+      background: #3a3a3a;
+      box-shadow: inset 0 2px 0 #2a2a2a;
+      transform: translateY(1px);
+    }
+    .export-size-btn.selected {
+      background: #306230;
+      color: #9bbc0f;
+      border-color: #8bac0f;
+      box-shadow: 0 0 8px rgba(139,172,15,0.3);
+    }
+
+    .export-preview-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .export-preview-label {
+      font-size: 7px;
+      color: #6a6a6a;
+      letter-spacing: 1px;
+    }
+
+    .export-preview-wrap {
+      background: #1a1a1a;
+      border: 2px solid #0f380f;
+      padding: 8px;
+      display: inline-block;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+
+    .export-preview-wrap canvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+
+    .export-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .export-action-btn {
+      padding: 10px 18px;
+      background: #306230;
+      border: 2px solid #0f380f;
+      border-radius: 4px;
+      color: #9bbc0f;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      cursor: pointer;
+      box-shadow: inset 0 -2px 0 #1a3a1a, inset 0 1px 0 #4a8a4a;
+      transition: all 0.1s;
+    }
+    .export-action-btn:hover {
+      background: #3a7a3a;
+      color: #fff;
+    }
+    .export-action-btn:active {
+      transform: translateY(1px);
+      box-shadow: inset 0 2px 0 #1a3a1a;
+    }
+    .export-action-btn.cancel {
+      background: #4a4a4a;
+      border-color: #1a1a1a;
+      color: #8bac0f;
+      box-shadow: inset 0 -2px 0 #333, inset 0 1px 0 #555;
+    }
+    .export-action-btn.cancel:hover {
+      background: #555;
+    }
+
+    /* 自定义尺寸输入 */
+    .export-custom {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .export-custom-input {
+      width: 50px;
+      padding: 6px 4px;
+      background: #1a1a1a;
+      border: 2px solid #0f380f;
+      border-radius: 3px;
+      color: #8bac0f;
+      font-size: 8px;
+      text-align: center;
+      outline: none;
+      font-family: 'Press Start 2P', monospace;
+    }
+    .export-custom-input:focus {
+      border-color: #9bbc0f;
+      box-shadow: 0 0 6px rgba(139,172,15,0.3);
+    }
+    .export-custom-x {
+      font-size: 8px;
+      color: #6a6a6a;
+    }
+
     /* 响应式 */
     @media (max-width: 680px) {
       .toolbar { padding: 6px 8px; gap: 4px; }
@@ -368,6 +532,8 @@
       .size-slider { width: 50px; }
       .canvas-area { margin: 6px; }
       .board-id-tag { max-width: 80px; font-size: 5px; }
+      .export-panel { min-width: unset; padding: 14px; }
+      .export-sizes { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
@@ -399,7 +565,8 @@
     <div class="toolbar-group">
       <span class="toolbar-label">PIXEL</span>
       <input type="number" class="pixel-size-input" id="pixelSizeInput" value="6" min="2" max="24" title="像素块大小">
-      <button class="tool-btn tool-btn-wide" id="btnPixelate" title="2-bit 像素化">▦ PIX</button>
+      <button class="tool-btn tool-btn-wide" id="btnPixelate" title="4色像素化">▦ 4C</button>
+      <button class="tool-btn tool-btn-wide" id="btnPixelate2bit" title="2色像素化（纯二值）">▦ 2C</button>
       <button class="tool-btn tool-btn-wide" id="btnOriginal" title="恢复原始画作" style="display:none;">▤ ORI</button>
     </div>
 
@@ -409,6 +576,7 @@
       <button class="tool-btn" id="btnRedo" title="重做">↷</button>
       <button class="tool-btn" id="btnClear" title="清空画布">✕</button>
       <button class="tool-btn" id="btnSave" title="保存为图片">⇩</button>
+      <button class="tool-btn tool-btn-wide" id="btnExportPixel" title="导出2bit像素画">▦ EXP</button>
     </div>
   </div>
 
@@ -440,6 +608,41 @@
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- 导出像素画弹窗 -->
+<div class="export-overlay" id="exportOverlay">
+  <div class="export-panel">
+    <div class="export-title">▦ EXPORT 2-BIT PIXEL ART ▦</div>
+    <div class="export-sizes" id="exportSizes">
+      <button class="export-size-btn" data-w="8" data-h="8">8x8</button>
+      <button class="export-size-btn selected" data-w="9" data-h="9">9x9</button>
+      <button class="export-size-btn" data-w="10" data-h="10">10x10</button>
+      <button class="export-size-btn" data-w="16" data-h="16">16x16</button>
+      <button class="export-size-btn" data-w="20" data-h="20">20x20</button>
+      <button class="export-size-btn" data-w="32" data-h="32">32x32</button>
+      <button class="export-size-btn" data-w="48" data-h="48">48x48</button>
+      <button class="export-size-btn" data-w="64" data-h="64">64x64</button>
+      <button class="export-size-btn" data-w="128" data-h="128">128x128</button>
+    </div>
+    <div class="export-custom">
+      <span class="export-custom-x">CUSTOM:</span>
+      <input type="number" class="export-custom-input" id="exportCustomW" value="9" min="2" max="512" placeholder="W">
+      <span class="export-custom-x">x</span>
+      <input type="number" class="export-custom-input" id="exportCustomH" value="9" min="2" max="512" placeholder="H">
+      <button class="export-size-btn" id="exportCustomApply" style="padding:6px 10px;">OK</button>
+    </div>
+    <div class="export-preview-area">
+      <span class="export-preview-label">PREVIEW (<span id="exportPreviewInfo">9x9</span>)</span>
+      <div class="export-preview-wrap" id="exportPreviewWrap">
+        <canvas id="exportPreviewCanvas"></canvas>
+      </div>
+    </div>
+    <div class="export-actions">
+      <button class="export-action-btn" id="exportDownload">⇩ DOWNLOAD PNG</button>
+      <button class="export-action-btn cancel" id="exportClose">✕ CLOSE</button>
+    </div>
+  </div>
+</div>
 
 <!-- Firebase SDK (compat 版本，支持直接在 script 标签中使用) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -796,12 +999,54 @@
     }
   }
 
+  // 2色像素化（真正的二值化：前景 #0f380f + 背景 #9bbc0f）
+  function pixelate2bit() {
+    const pixelSize = parseInt(document.getElementById('pixelSizeInput').value, 10) || 6;
+    const w = drawCanvas.width;
+    const h = drawCanvas.height;
+    const srcData = drawCtx.getImageData(0, 0, w, h);
+    const src = srcData.data;
+
+    const fg = GB_PALETTE[0]; // #0f380f
+    const bg = GB_PALETTE[3]; // #9bbc0f
+    const fgLum = 0.299 * fg.r + 0.587 * fg.g + 0.114 * fg.b;
+    const bgLum = 0.299 * bg.r + 0.587 * bg.g + 0.114 * bg.b;
+    const threshold = (fgLum + bgLum) / 2;
+
+    pixelCtx.fillStyle = GB_BG_COLOR;
+    pixelCtx.fillRect(0, 0, w, h);
+
+    for (let y = 0; y < h; y += pixelSize) {
+      for (let x = 0; x < w; x += pixelSize) {
+        let lumSum = 0, count = 0;
+        const bw = Math.min(pixelSize, w - x);
+        const bh = Math.min(pixelSize, h - y);
+
+        for (let by = 0; by < bh; by++) {
+          for (let bx = 0; bx < bw; bx++) {
+            const idx = ((y + by) * w + (x + bx)) * 4;
+            lumSum += 0.299 * src[idx] + 0.587 * src[idx + 1] + 0.114 * src[idx + 2];
+            count++;
+          }
+        }
+
+        const avgLum = lumSum / count;
+        const color = avgLum < threshold ? fg : bg;
+        pixelCtx.fillStyle = `rgb(${color.r},${color.g},${color.b})`;
+
+        const gap = pixelSize > 4 ? 1 : 0;
+        pixelCtx.fillRect(x, y, pixelSize - gap, pixelSize - gap);
+      }
+    }
+  }
+
   // =============================================
   //  工具栏事件
   // =============================================
   const btnPen = document.getElementById('btnPen');
   const btnEraser = document.getElementById('btnEraser');
   const btnPixelate = document.getElementById('btnPixelate');
+  const btnPixelate2bit = document.getElementById('btnPixelate2bit');
   const btnOriginal = document.getElementById('btnOriginal');
   const btnUndo = document.getElementById('btnUndo');
   const btnRedo = document.getElementById('btnRedo');
@@ -849,8 +1094,19 @@
     pixelCanvas.classList.add('visible');
     isPixelMode = true;
     btnPixelate.style.display = 'none';
+    btnPixelate2bit.style.display = 'none';
     btnOriginal.style.display = '';
-    showToast('2-BIT PIXELIZED!');
+    showToast('4-COLOR PIXELIZED!');
+  });
+
+  btnPixelate2bit.addEventListener('click', () => {
+    pixelate2bit();
+    pixelCanvas.classList.add('visible');
+    isPixelMode = true;
+    btnPixelate.style.display = 'none';
+    btnPixelate2bit.style.display = 'none';
+    btnOriginal.style.display = '';
+    showToast('2-COLOR PIXELIZED!');
   });
 
   btnOriginal.addEventListener('click', () => {
@@ -859,6 +1115,7 @@
     isPixelMode = false;
     btnOriginal.style.display = 'none';
     btnPixelate.style.display = '';
+    btnPixelate2bit.style.display = '';
     showToast('ORIGINAL');
   });
 
@@ -884,6 +1141,7 @@
     isPixelMode = false;
     btnOriginal.style.display = 'none';
     btnPixelate.style.display = '';
+    btnPixelate2bit.style.display = '';
     // 广播清空到 Firebase
     clearRef.set({ by: myPlayerId, at: firebase.database.ServerValue.TIMESTAMP });
     // 清空 Firebase 中的笔迹和快照
@@ -918,6 +1176,136 @@
   //  初始化
   // =============================================
   saveState();
+
+  // =============================================
+  //  导出 2-bit 像素画（不同尺寸）
+  // =============================================
+  const exportOverlay = document.getElementById('exportOverlay');
+  const exportPreviewCanvas = document.getElementById('exportPreviewCanvas');
+  const exportPreviewCtx = exportPreviewCanvas.getContext('2d');
+  const exportPreviewInfo = document.getElementById('exportPreviewInfo');
+  const exportPreviewWrap = document.getElementById('exportPreviewWrap');
+  const btnExportPixel = document.getElementById('btnExportPixel');
+  const exportCustomW = document.getElementById('exportCustomW');
+  const exportCustomH = document.getElementById('exportCustomH');
+  const exportCustomApply = document.getElementById('exportCustomApply');
+  const exportDownload = document.getElementById('exportDownload');
+  const exportClose = document.getElementById('exportClose');
+
+  let exportW = 9, exportH = 9;
+
+  // 真正的 2-bit = 只有 2 种颜色：前景（最深 #0f380f）+ 背景（最浅 #9bbc0f）
+  const EXPORT_FG = GB_PALETTE[0]; // #0f380f
+  const EXPORT_BG = GB_PALETTE[3]; // #9bbc0f
+
+  function generatePixelExport(targetW, targetH) {
+    // 1. 将画布内容缩小到 targetW x targetH
+    const tmpCanvas = document.createElement('canvas');
+    tmpCanvas.width = targetW;
+    tmpCanvas.height = targetH;
+    const tmpCtx = tmpCanvas.getContext('2d');
+    tmpCtx.imageSmoothingEnabled = true;
+    tmpCtx.imageSmoothingQuality = 'medium';
+
+    // 取源画布（优先用像素模式的画布）
+    const srcCanvas = isPixelMode ? pixelCanvas : drawCanvas;
+    tmpCtx.drawImage(srcCanvas, 0, 0, srcCanvas.width, srcCanvas.height, 0, 0, targetW, targetH);
+
+    // 2. 二值化：计算亮度，低于阈值为前景色，否则为背景色
+    const imgData = tmpCtx.getImageData(0, 0, targetW, targetH);
+    const px = imgData.data;
+
+    // 背景色的亮度作为参考，阈值取前景与背景亮度的中点
+    const fgLum = 0.299 * EXPORT_FG.r + 0.587 * EXPORT_FG.g + 0.114 * EXPORT_FG.b;
+    const bgLum = 0.299 * EXPORT_BG.r + 0.587 * EXPORT_BG.g + 0.114 * EXPORT_BG.b;
+    const threshold = (fgLum + bgLum) / 2;
+
+    for (let i = 0; i < px.length; i += 4) {
+      const lum = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+      const color = lum < threshold ? EXPORT_FG : EXPORT_BG;
+      px[i]     = color.r;
+      px[i + 1] = color.g;
+      px[i + 2] = color.b;
+      px[i + 3] = 255;
+    }
+    tmpCtx.putImageData(imgData, 0, 0);
+    return tmpCanvas;
+  }
+
+  function updateExportPreview() {
+    const result = generatePixelExport(exportW, exportH);
+
+    // 预览：放大显示，每个像素显示为方块
+    const maxPreviewSize = 256;
+    const scale = Math.max(1, Math.floor(maxPreviewSize / Math.max(exportW, exportH)));
+    const previewW = exportW * scale;
+    const previewH = exportH * scale;
+
+    exportPreviewCanvas.width = previewW;
+    exportPreviewCanvas.height = previewH;
+    exportPreviewCtx.imageSmoothingEnabled = false;
+    exportPreviewCtx.drawImage(result, 0, 0, exportW, exportH, 0, 0, previewW, previewH);
+
+    exportPreviewCanvas.style.width = previewW + 'px';
+    exportPreviewCanvas.style.height = previewH + 'px';
+
+    exportPreviewInfo.textContent = exportW + 'x' + exportH;
+  }
+
+  function openExportPanel() {
+    exportOverlay.classList.add('open');
+    updateExportPreview();
+  }
+
+  function closeExportPanel() {
+    exportOverlay.classList.remove('open');
+  }
+
+  btnExportPixel.addEventListener('click', openExportPanel);
+  exportClose.addEventListener('click', closeExportPanel);
+  exportOverlay.addEventListener('click', (e) => {
+    if (e.target === exportOverlay) closeExportPanel();
+  });
+
+  // 尺寸按钮点击
+  document.querySelectorAll('#exportSizes .export-size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#exportSizes .export-size-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      exportW = parseInt(btn.dataset.w, 10);
+      exportH = parseInt(btn.dataset.h, 10);
+      exportCustomW.value = exportW;
+      exportCustomH.value = exportH;
+      updateExportPreview();
+    });
+  });
+
+  // 自定义尺寸
+  exportCustomApply.addEventListener('click', () => {
+    const w = Math.max(2, Math.min(512, parseInt(exportCustomW.value, 10) || 9));
+    const h = Math.max(2, Math.min(512, parseInt(exportCustomH.value, 10) || 9));
+    exportW = w;
+    exportH = h;
+    exportCustomW.value = w;
+    exportCustomH.value = h;
+    // 取消预设按钮的选中
+    document.querySelectorAll('#exportSizes .export-size-btn').forEach(b => {
+      const bw = parseInt(b.dataset.w, 10);
+      const bh = parseInt(b.dataset.h, 10);
+      b.classList.toggle('selected', bw === w && bh === h);
+    });
+    updateExportPreview();
+  });
+
+  // 下载
+  exportDownload.addEventListener('click', () => {
+    const result = generatePixelExport(exportW, exportH);
+    const link = document.createElement('a');
+    link.download = 'pixel-art-' + exportW + 'x' + exportH + '-' + boardId.slice(0, 8) + '.png';
+    link.href = result.toDataURL('image/png');
+    link.click();
+    showToast(exportW + 'x' + exportH + ' EXPORTED!');
+  });
 
   // =============================================
   //  自动保存到 Firebase (快照)
