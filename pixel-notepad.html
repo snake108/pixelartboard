@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Pixel Notepad ✦ 像素记事板</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #2b2b2b;
+      font-family: 'Press Start 2P', 'Courier New', monospace;
+      color: #8bac0f;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* ========== 顶部工具栏 - 游戏机外壳风格 ========== */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      background: #3a3a3a;
+      border-bottom: 3px solid #1a1a1a;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      z-index: 10;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0 8px;
+      border-right: 2px solid #2b2b2b;
+    }
+    .toolbar-group:last-child { border-right: none; }
+
+    .toolbar-label {
+      font-size: 7px;
+      color: #6a6a6a;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-right: 4px;
+      white-space: nowrap;
+    }
+
+    .tool-btn {
+      width: 36px; height: 36px;
+      border: 2px solid #1a1a1a;
+      border-radius: 4px;
+      background: #4a4a4a;
+      color: #8bac0f;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.1s;
+      position: relative;
+      box-shadow: inset 0 -2px 0 #333, inset 0 1px 0 #555;
+      font-family: 'Press Start 2P', monospace;
+    }
+    .tool-btn:hover {
+      background: #555;
+      color: #9bbc0f;
+      box-shadow: inset 0 -1px 0 #444, inset 0 1px 0 #666;
+    }
+    .tool-btn:active {
+      background: #3a3a3a;
+      box-shadow: inset 0 2px 0 #2a2a2a;
+      transform: translateY(1px);
+    }
+    .tool-btn.active {
+      background: #306230;
+      color: #9bbc0f;
+      border-color: #0f380f;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.4), 0 0 8px rgba(139,172,15,0.2);
+    }
+
+    .tool-btn-wide {
+      width: auto;
+      padding: 0 10px;
+      font-size: 8px;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    /* Game Boy 4色调色板 */
+    .color-swatch {
+      width: 26px; height: 26px;
+      border: 2px solid #1a1a1a;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.1s;
+      flex-shrink: 0;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,0.3);
+    }
+    .color-swatch:hover { transform: scale(1.1); }
+    .color-swatch.active {
+      border-color: #9bbc0f;
+      box-shadow: 0 0 8px rgba(139,172,15,0.5), inset 0 -1px 0 rgba(0,0,0,0.3);
+      transform: scale(1.08);
+    }
+
+    /* 滑块 - 游戏机风格 */
+    .size-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 80px;
+      height: 6px;
+      background: #1a1a1a;
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+      border: 1px solid #0f0f0f;
+    }
+    .size-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 18px;
+      border-radius: 2px;
+      background: #8bac0f;
+      border: 2px solid #306230;
+      cursor: pointer;
+      box-shadow: 0 0 4px rgba(139,172,15,0.3);
+    }
+    .size-value {
+      font-size: 8px;
+      color: #6a6a6a;
+      min-width: 20px;
+      text-align: center;
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    /* 像素块大小输入 */
+    .pixel-size-input {
+      width: 42px;
+      padding: 4px 4px;
+      background: #1a1a1a;
+      border: 2px solid #0f380f;
+      border-radius: 3px;
+      color: #8bac0f;
+      font-size: 8px;
+      text-align: center;
+      outline: none;
+      font-family: 'Press Start 2P', monospace;
+    }
+    .pixel-size-input:focus {
+      border-color: #9bbc0f;
+      box-shadow: 0 0 6px rgba(139,172,15,0.3);
+    }
+
+    /* ========== 画布区域 - Game Boy 屏幕 ========== */
+    .canvas-area {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      margin: 12px;
+      border-radius: 8px;
+      border: 4px solid #1a1a1a;
+      box-shadow:
+        inset 0 0 30px rgba(0,0,0,0.3),
+        0 0 0 2px #4a4a4a,
+        0 4px 12px rgba(0,0,0,0.4);
+      background: #9bbc0f;
+    }
+
+    .canvas-wrapper {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+
+    canvas {
+      display: block;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    /* 像素化叠加层 */
+    #pixelCanvas {
+      position: absolute;
+      top: 0; left: 0;
+      pointer-events: none;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #pixelCanvas.visible {
+      opacity: 1;
+      pointer-events: auto;
+      cursor: crosshair;
+    }
+
+    /* ========== 底部状态栏 ========== */
+    .statusbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: #3a3a3a;
+      border-top: 3px solid #1a1a1a;
+      font-size: 7px;
+      color: #5a5a5a;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .statusbar-hint { letter-spacing: 0.5px; }
+
+    /* 品牌标识 */
+    .brand-tag {
+      font-size: 8px;
+      color: #555;
+      letter-spacing: 2px;
+      text-align: center;
+      padding: 2px 0;
+    }
+
+    /* ========== 提示消息 - 像素风弹窗 ========== */
+    .toast {
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #0f380f;
+      color: #9bbc0f;
+      padding: 10px 20px;
+      border-radius: 0;
+      border: 3px solid #306230;
+      font-size: 8px;
+      font-family: 'Press Start 2P', monospace;
+      box-shadow: 4px 4px 0 #0a0a0a;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ========== 橡皮擦光标 ========== */
+    .eraser-cursor { cursor: none; }
+    .eraser-ring {
+      position: fixed;
+      pointer-events: none;
+      border: 2px solid rgba(15,56,15,0.6);
+      border-radius: 0;
+      z-index: 20;
+      display: none;
+    }
+
+    /* 屏幕扫描线效果 */
+    .scanlines {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 5;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+    }
+
+    /* 响应式 */
+    @media (max-width: 680px) {
+      .toolbar { padding: 6px 8px; gap: 4px; }
+      .toolbar-label { display: none; }
+      .tool-btn { width: 30px; height: 30px; font-size: 12px; }
+      .size-slider { width: 50px; }
+      .canvas-area { margin: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- 工具栏 -->
+  <div class="toolbar">
+    <div class="toolbar-group">
+      <span class="toolbar-label">TOOL</span>
+      <button class="tool-btn active" id="btnPen" title="画笔">✎</button>
+      <button class="tool-btn" id="btnEraser" title="橡皮擦">◻</button>
+    </div>
+
+    <div class="toolbar-group">
+      <span class="toolbar-label">INK</span>
+      <div class="color-swatch active" style="background:#0f380f" data-color="#0f380f" title="最深"></div>
+      <div class="color-swatch" style="background:#306230" data-color="#306230" title="深"></div>
+      <div class="color-swatch" style="background:#8bac0f" data-color="#8bac0f" title="浅"></div>
+      <div class="color-swatch" style="background:#9bbc0f" data-color="#9bbc0f" title="最浅（背景色）"></div>
+    </div>
+
+    <div class="toolbar-group">
+      <span class="toolbar-label">SIZE</span>
+      <input type="range" class="size-slider" id="sizeSlider" min="1" max="20" value="3">
+      <span class="size-value" id="sizeValue">3</span>
+    </div>
+
+    <div class="toolbar-group">
+      <span class="toolbar-label">PIXEL</span>
+      <input type="number" class="pixel-size-input" id="pixelSizeInput" value="6" min="2" max="24" title="像素块大小">
+      <button class="tool-btn tool-btn-wide" id="btnPixelate" title="2-bit 像素化">▦ PIX</button>
+      <button class="tool-btn tool-btn-wide" id="btnOriginal" title="恢复原始画作" style="display:none;">▤ ORI</button>
+    </div>
+
+    <div class="toolbar-group">
+      <span class="toolbar-label">ACT</span>
+      <button class="tool-btn" id="btnUndo" title="撤销">↶</button>
+      <button class="tool-btn" id="btnRedo" title="重做">↷</button>
+      <button class="tool-btn" id="btnClear" title="清空画布">✕</button>
+      <button class="tool-btn" id="btnSave" title="保存为图片">⇩</button>
+    </div>
+  </div>
+
+  <!-- 画布 -->
+  <div class="canvas-area" id="canvasArea">
+    <div class="canvas-wrapper">
+      <canvas id="drawCanvas"></canvas>
+      <canvas id="pixelCanvas"></canvas>
+    </div>
+    <div class="scanlines"></div>
+  </div>
+
+  <!-- 状态栏 -->
+  <div class="statusbar">
+    <span class="statusbar-hint">DRAW · PIXELIZE · SAVE</span>
+    <span class="brand-tag">DOT MATRIX GAME</span>
+    <span id="coordsDisplay">—</span>
+  </div>
+</div>
+
+<!-- 橡皮擦光标 -->
+<div class="eraser-ring" id="eraserRing"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // =============================================
+  //  Game Boy 2-bit 调色板 (4色)
+  //  从最深到最浅：
+  //    #0f380f  (darkest - 墨绿/近黑)
+  //    #306230  (dark - 深绿)
+  //    #8bac0f  (light - 亮绿)
+  //    #9bbc0f  (lightest - 浅绿 = 背景色)
+  // =============================================
+  const GB_PALETTE = [
+    { r: 15,  g: 56,  b: 15  },  // #0f380f - darkest
+    { r: 48,  g: 98,  b: 48  },  // #306230 - dark
+    { r: 139, g: 172, b: 15  },  // #8bac0f - light
+    { r: 155, g: 188, b: 15  },  // #9bbc0f - lightest (background)
+  ];
+  const GB_BG_COLOR = '#9bbc0f';
+  const GB_BG_RGB = GB_PALETTE[3];
+
+  // =============================================
+  //  基础设置
+  // =============================================
+  const drawCanvas = document.getElementById('drawCanvas');
+  const drawCtx = drawCanvas.getContext('2d');
+  const pixelCanvas = document.getElementById('pixelCanvas');
+  const pixelCtx = pixelCanvas.getContext('2d');
+  const canvasArea = document.getElementById('canvasArea');
+  const toast = document.getElementById('toast');
+  const eraserRing = document.getElementById('eraserRing');
+  const coordsDisplay = document.getElementById('coordsDisplay');
+
+  let currentColor = '#0f380f';
+  let brushSize = 3;
+  let tool = 'pen';
+  let isDrawing = false;
+  let lastX = 0, lastY = 0;
+  let isPixelMode = false;
+
+  // 历史记录
+  const undoStack = [];
+  const redoStack = [];
+  const MAX_HISTORY = 40;
+
+  function resizeCanvases() {
+    const w = canvasArea.clientWidth;
+    const h = canvasArea.clientHeight;
+    if (w <= 0 || h <= 0) return;
+
+    const imgData = (drawCanvas.width > 0 && drawCanvas.height > 0)
+      ? drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height) : null;
+
+    drawCanvas.width = w;
+    drawCanvas.height = h;
+    pixelCanvas.width = w;
+    pixelCanvas.height = h;
+
+    // 填充 GB 背景色
+    drawCtx.fillStyle = GB_BG_COLOR;
+    drawCtx.fillRect(0, 0, w, h);
+
+    // 恢复内容
+    if (imgData) drawCtx.putImageData(imgData, 0, 0);
+
+    drawCtx.lineCap = 'round';
+    drawCtx.lineJoin = 'round';
+  }
+
+  resizeCanvases();
+  window.addEventListener('resize', resizeCanvases);
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(() => resizeCanvases()).observe(canvasArea);
+  }
+
+  // 初始化背景
+  function initBackground() {
+    drawCtx.fillStyle = GB_BG_COLOR;
+    drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+  }
+  initBackground();
+
+  // =============================================
+  //  历史快照
+  // =============================================
+  function saveState() {
+    undoStack.push(drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height));
+    if (undoStack.length > MAX_HISTORY) undoStack.shift();
+    redoStack.length = 0;
+  }
+
+  function undo() {
+    if (undoStack.length === 0) return;
+    redoStack.push(drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height));
+    const state = undoStack.pop();
+    drawCtx.putImageData(state, 0, 0);
+    if (isPixelMode) pixelate();
+    showToast('UNDO');
+  }
+
+  function redo() {
+    if (redoStack.length === 0) return;
+    undoStack.push(drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height));
+    const state = redoStack.pop();
+    drawCtx.putImageData(state, 0, 0);
+    if (isPixelMode) pixelate();
+    showToast('REDO');
+  }
+
+  // =============================================
+  //  Toast 提示
+  // =============================================
+  let toastTimer = null;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1500);
+  }
+
+  // =============================================
+  //  绘制逻辑
+  // =============================================
+  function getPointerPos(e, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    isDrawing = true;
+    const targetCanvas = isPixelMode ? pixelCanvas : drawCanvas;
+    const pos = getPointerPos(e, targetCanvas);
+    lastX = pos.x;
+    lastY = pos.y;
+    if (!isPixelMode) saveState();
+  }
+
+  function draw(e) {
+    e.preventDefault();
+    if (!isDrawing) return;
+
+    const targetCanvas = isPixelMode ? pixelCanvas : drawCanvas;
+    const ctx = isPixelMode ? pixelCtx : drawCtx;
+    const pos = getPointerPos(e, targetCanvas);
+
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(pos.x, pos.y);
+
+    if (tool === 'eraser') {
+      // 橡皮擦 = 用背景色覆盖
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = GB_BG_COLOR;
+      ctx.lineWidth = brushSize * 3;
+    } else {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = currentColor;
+      ctx.lineWidth = brushSize;
+    }
+
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    lastX = pos.x;
+    lastY = pos.y;
+    coordsDisplay.textContent = `${Math.round(pos.x)},${Math.round(pos.y)}`;
+  }
+
+  function endDraw(e) {
+    if (e) e.preventDefault();
+    isDrawing = false;
+  }
+
+  // 事件绑定
+  drawCanvas.addEventListener('mousedown', startDraw);
+  drawCanvas.addEventListener('mousemove', draw);
+  drawCanvas.addEventListener('mouseup', endDraw);
+  drawCanvas.addEventListener('mouseleave', endDraw);
+  drawCanvas.addEventListener('touchstart', startDraw, { passive: false });
+  drawCanvas.addEventListener('touchmove', draw, { passive: false });
+  drawCanvas.addEventListener('touchend', endDraw, { passive: false });
+  drawCanvas.addEventListener('touchcancel', endDraw, { passive: false });
+
+  pixelCanvas.addEventListener('mousedown', startDraw);
+  pixelCanvas.addEventListener('mousemove', draw);
+  pixelCanvas.addEventListener('mouseup', endDraw);
+  pixelCanvas.addEventListener('mouseleave', endDraw);
+  pixelCanvas.addEventListener('touchstart', startDraw, { passive: false });
+  pixelCanvas.addEventListener('touchmove', draw, { passive: false });
+  pixelCanvas.addEventListener('touchend', endDraw, { passive: false });
+  pixelCanvas.addEventListener('touchcancel', endDraw, { passive: false });
+
+  // =============================================
+  //  橡皮擦视觉光标
+  // =============================================
+  document.addEventListener('mousemove', (e) => {
+    if (tool === 'eraser') {
+      const size = brushSize * 3;
+      eraserRing.style.display = 'block';
+      eraserRing.style.width = size + 'px';
+      eraserRing.style.height = size + 'px';
+      eraserRing.style.left = (e.clientX - size / 2) + 'px';
+      eraserRing.style.top = (e.clientY - size / 2) + 'px';
+    } else {
+      eraserRing.style.display = 'none';
+    }
+  });
+
+  // =============================================
+  //  2-bit 像素化转换 (量化到 Game Boy 4色)
+  // =============================================
+  function nearestGBColor(r, g, b) {
+    let minDist = Infinity;
+    let best = 0;
+    for (let i = 0; i < GB_PALETTE.length; i++) {
+      const p = GB_PALETTE[i];
+      const dr = r - p.r;
+      const dg = g - p.g;
+      const db = b - p.b;
+      const dist = dr * dr + dg * dg + db * db;
+      if (dist < minDist) {
+        minDist = dist;
+        best = i;
+      }
+    }
+    return GB_PALETTE[best];
+  }
+
+  function pixelate() {
+    const pixelSize = parseInt(document.getElementById('pixelSizeInput').value, 10) || 6;
+    const w = drawCanvas.width;
+    const h = drawCanvas.height;
+    const srcData = drawCtx.getImageData(0, 0, w, h);
+    const src = srcData.data;
+
+    // 填充 GB 背景
+    pixelCtx.fillStyle = GB_BG_COLOR;
+    pixelCtx.fillRect(0, 0, w, h);
+
+    for (let y = 0; y < h; y += pixelSize) {
+      for (let x = 0; x < w; x += pixelSize) {
+        let rSum = 0, gSum = 0, bSum = 0, count = 0;
+        const bw = Math.min(pixelSize, w - x);
+        const bh = Math.min(pixelSize, h - y);
+
+        for (let by = 0; by < bh; by++) {
+          for (let bx = 0; bx < bw; bx++) {
+            const idx = ((y + by) * w + (x + bx)) * 4;
+            rSum += src[idx];
+            gSum += src[idx + 1];
+            bSum += src[idx + 2];
+            count++;
+          }
+        }
+
+        const avgR = Math.round(rSum / count);
+        const avgG = Math.round(gSum / count);
+        const avgB = Math.round(bSum / count);
+
+        // 量化到最近的 GB 调色板颜色
+        const gbColor = nearestGBColor(avgR, avgG, avgB);
+        pixelCtx.fillStyle = `rgb(${gbColor.r},${gbColor.g},${gbColor.b})`;
+
+        // 像素块之间留微小间隙
+        const gap = pixelSize > 4 ? 1 : 0;
+        pixelCtx.fillRect(x, y, pixelSize - gap, pixelSize - gap);
+      }
+    }
+  }
+
+  // =============================================
+  //  工具栏事件
+  // =============================================
+  const btnPen = document.getElementById('btnPen');
+  const btnEraser = document.getElementById('btnEraser');
+  const btnPixelate = document.getElementById('btnPixelate');
+  const btnOriginal = document.getElementById('btnOriginal');
+  const btnUndo = document.getElementById('btnUndo');
+  const btnRedo = document.getElementById('btnRedo');
+  const btnClear = document.getElementById('btnClear');
+  const btnSave = document.getElementById('btnSave');
+  const sizeSlider = document.getElementById('sizeSlider');
+  const sizeValue = document.getElementById('sizeValue');
+
+  btnPen.addEventListener('click', () => {
+    tool = 'pen';
+    btnPen.classList.add('active');
+    btnEraser.classList.remove('active');
+    drawCanvas.classList.remove('eraser-cursor');
+    pixelCanvas.classList.remove('eraser-cursor');
+    eraserRing.style.display = 'none';
+    drawCanvas.style.cursor = 'crosshair';
+    pixelCanvas.style.cursor = 'crosshair';
+  });
+
+  btnEraser.addEventListener('click', () => {
+    tool = 'eraser';
+    btnEraser.classList.add('active');
+    btnPen.classList.remove('active');
+    drawCanvas.classList.add('eraser-cursor');
+    pixelCanvas.classList.add('eraser-cursor');
+    drawCanvas.style.cursor = 'none';
+    pixelCanvas.style.cursor = 'none';
+  });
+
+  // 4色选择
+  document.querySelectorAll('.color-swatch').forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+      swatch.classList.add('active');
+      currentColor = swatch.dataset.color;
+    });
+  });
+
+  // 笔刷大小
+  sizeSlider.addEventListener('input', (e) => {
+    brushSize = parseInt(e.target.value, 10);
+    sizeValue.textContent = brushSize;
+  });
+
+  // 像素化
+  btnPixelate.addEventListener('click', () => {
+    pixelate();
+    pixelCanvas.classList.add('visible');
+    isPixelMode = true;
+    btnPixelate.style.display = 'none';
+    btnOriginal.style.display = '';
+    showToast('2-BIT PIXELIZED!');
+  });
+
+  btnOriginal.addEventListener('click', () => {
+    pixelCanvas.classList.remove('visible');
+    pixelCtx.clearRect(0, 0, pixelCanvas.width, pixelCanvas.height);
+    isPixelMode = false;
+    btnOriginal.style.display = 'none';
+    btnPixelate.style.display = '';
+    showToast('ORIGINAL');
+  });
+
+  btnUndo.addEventListener('click', undo);
+  btnRedo.addEventListener('click', redo);
+
+  // 键盘快捷键
+  document.addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey) {
+      if (e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+      if (e.key === 'z' && e.shiftKey) { e.preventDefault(); redo(); }
+      if (e.key === 'y') { e.preventDefault(); redo(); }
+      if (e.key === 's') { e.preventDefault(); saveImage(); }
+    }
+  });
+
+  // 清空
+  btnClear.addEventListener('click', () => {
+    saveState();
+    drawCtx.fillStyle = GB_BG_COLOR;
+    drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+    pixelCtx.clearRect(0, 0, pixelCanvas.width, pixelCanvas.height);
+    pixelCanvas.classList.remove('visible');
+    isPixelMode = false;
+    btnOriginal.style.display = 'none';
+    btnPixelate.style.display = '';
+    showToast('CLEARED');
+  });
+
+  // 保存
+  btnSave.addEventListener('click', saveImage);
+
+  function saveImage() {
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = drawCanvas.width;
+    exportCanvas.height = drawCanvas.height;
+    const exportCtx = exportCanvas.getContext('2d');
+
+    if (isPixelMode) {
+      exportCtx.drawImage(pixelCanvas, 0, 0);
+    } else {
+      exportCtx.drawImage(drawCanvas, 0, 0);
+    }
+
+    const link = document.createElement('a');
+    link.download = 'pixel-notepad-' + Date.now() + '.png';
+    link.href = exportCanvas.toDataURL('image/png');
+    link.click();
+    showToast('SAVED!');
+  }
+
+  // =============================================
+  //  初始化
+  // =============================================
+  saveState();
+</script>
+
+</body>
+</html>
